@@ -1,0 +1,16 @@
+{
+  "name": "loginapi",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf dist && echo 'Done.'",
+    "dev": "bun server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
