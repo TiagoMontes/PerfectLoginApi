@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: Profile API
+  description: Authenticated user's profile management
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /profile:
+    get:
+      summary: Get own profile
+      description: Retrieve authenticated user's profile information
+      operationId: getProfile
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProfileResponse'
+                  message:
+                    type: string
+                    example: Profile retrieved successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    put:
+      summary: Update own profile
+      description: Update authenticated user's profile information
+      operationId: updateProfile
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+            examples:
+              updateEmailAndName:
+                summary: Update email and name
+                value:
+                  email: newemail@example.com
+                  name: New Name
+              updatePassword:
+                summary: Update password only
+                value:
+                  password: NewSecurePass789
+              updateAllFields:
+                summary: Update all editable fields
+                value:
+                  email: updated@example.com
+                  password: UpdatedPass123
+                  name: Updated Name
+                  phone: '+9876543210'
+                  address: 999 New Street
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ProfileResponse'
+                  message:
+                    type: string
+                    example: Profile updated successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: ConflictError
+                  message:
+                    type: string
+                    example: Email already in use
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from /auth/login
+
+  schemas:
+    UpdateProfileRequest:
+      type: object
+      minProperties: 1
+      description: At least one field must be provided
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Updated email address
+          example: newemail@example.com
+        password:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+          description: New password (min 8 chars, 1 uppercase, 1 lowercase, 1 number)
+          example: NewPassword456
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Updated full name
+          example: Jane Smith
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          description: Updated phone number (E.164 format recommended)
+          example: '+9876543210'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Updated physical address
+          example: 789 New Avenue
+      example:
+        email: updated@example.com
+        name: Updated Name
+
+    ProfileResponse:
+      type: object
+      description: User's profile information (excludes password, cannot modify role/status)
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        name:
+          type: string
+          description: User's full name
+          example: John Doe
+        phone:
+          type: string
+          description: User's phone number
+          example: '+1234567890'
+        address:
+          type: string
+          description: User's physical address
+          example: 123 Main St
+        role:
+          type: string
+          enum: [ADMIN, OPERATOR, CLIENT]
+          description: User's permission level (read-only)
+          example: CLIENT
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, DELETED]
+          description: Account status (read-only)
+          example: ACTIVE
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: '2026-02-14T10:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: '2026-02-14T10:00:00.000Z'
+
+  responses:
+    UnauthorizedError:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: UnauthorizedError
+              message:
+                type: string
+                example: No authorization token provided
+
+    ValidationError:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: ValidationError
+              message:
+                type: string
+                example: Invalid input provided
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Invalid email format

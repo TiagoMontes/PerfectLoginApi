@@ -1,0 +1,390 @@
+openapi: 3.0.3
+info:
+  title: User Management API
+  description: Administrative user CRUD operations
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /users:
+    get:
+      summary: List all users
+      description: Retrieve all user accounts (ADMIN and OPERATOR only)
+      operationId: listUsers
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserResponse'
+                  message:
+                    type: string
+                    example: Users retrieved successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      summary: Create new user (sign up)
+      description: Register a new user account
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserResponse'
+                  message:
+                    type: string
+                    example: User created successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: ConflictError
+                  message:
+                    type: string
+                    example: Email already in use
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: User ID
+
+    get:
+      summary: Get user by ID
+      description: Retrieve specific user details (ADMIN and OPERATOR only)
+      operationId: getUserById
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserResponse'
+                  message:
+                    type: string
+                    example: User retrieved successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      summary: Update user
+      description: Update user information (ADMIN only)
+      operationId: updateUser
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserResponse'
+                  message:
+                    type: string
+                    example: User updated successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: ConflictError
+                  message:
+                    type: string
+                    example: Email already in use
+
+    delete:
+      summary: Delete user
+      description: Soft delete user account (ADMIN only)
+      operationId: deleteUser
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+        - phone
+        - address
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Unique email address
+          example: newuser@example.com
+        password:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+          description: Password (min 8 chars, 1 uppercase, 1 lowercase, 1 number)
+          example: SecurePass123
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Full name
+          example: Jane Doe
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          description: Phone number (E.164 format recommended)
+          example: '+1234567890'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Physical address
+          example: 456 Oak Avenue
+        role:
+          type: string
+          enum: [ADMIN, OPERATOR, CLIENT]
+          description: Permission level (defaults to CLIENT, only ADMIN can set ADMIN/OPERATOR)
+          default: CLIENT
+          example: CLIENT
+
+    UpdateUserRequest:
+      type: object
+      minProperties: 1
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: updated@example.com
+        password:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+          example: NewPassword456
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Jane Smith
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          example: '+9876543210'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: 789 Pine Road
+        role:
+          type: string
+          enum: [ADMIN, OPERATOR, CLIENT]
+          description: Only ADMIN can modify roles
+          example: OPERATOR
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, DELETED]
+          description: Only ADMIN can modify status
+          example: INACTIVE
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: '+1234567890'
+        address:
+          type: string
+          example: 123 Main St
+        role:
+          type: string
+          enum: [ADMIN, OPERATOR, CLIENT]
+          example: CLIENT
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, DELETED]
+          example: ACTIVE
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-02-14T10:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-02-14T10:00:00.000Z'
+
+  responses:
+    UnauthorizedError:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: UnauthorizedError
+              message:
+                type: string
+                example: No authorization token provided
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: ForbiddenError
+              message:
+                type: string
+                example: Insufficient permissions
+
+    NotFoundError:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: NotFoundError
+              message:
+                type: string
+                example: User not found
+
+    ValidationError:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: ValidationError
+              message:
+                type: string
+                example: Invalid input provided
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Invalid email format
