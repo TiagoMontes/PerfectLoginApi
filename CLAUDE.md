@@ -104,3 +104,10 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+
+## Active Technologies
+- TypeScript with Bun runtime (latest stable) (001-user-auth-api)
+- In-memory data structures (Map/Array) - no database persistence initially (001-user-auth-api)
+
+## Recent Changes
+- 001-user-auth-api: Added TypeScript with Bun runtime (latest stable)
