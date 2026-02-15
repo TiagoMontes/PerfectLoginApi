@@ -82,41 +82,41 @@ Single backend API project - all paths relative to repository root:
 ### Implementation for User Story 1
 
 **DTOs**:
-- [ ] T030 [P] [US1] Create LoginRequest DTO with Zod schema in src/dtos/auth/LoginRequest.ts
-- [ ] T031 [P] [US1] Create LoginResponse DTO in src/dtos/auth/LoginResponse.ts
-- [ ] T032 [P] [US1] Create LogoutResponse DTO in src/dtos/auth/LogoutResponse.ts
-- [ ] T033 [P] [US1] Create CreateUserRequest DTO with Zod schema in src/dtos/users/CreateUserRequest.ts
-- [ ] T034 [P] [US1] Create UserResponse DTO in src/dtos/users/UserResponse.ts
+- [X] T030 [P] [US1] Create LoginRequest DTO with Zod schema in src/dtos/auth/LoginRequest.ts
+- [X] T031 [P] [US1] Create LoginResponse DTO in src/dtos/auth/LoginResponse.ts
+- [X] T032 [P] [US1] Create LogoutResponse DTO in src/dtos/auth/LogoutResponse.ts
+- [X] T033 [P] [US1] Create CreateUserRequest DTO with Zod schema in src/dtos/users/CreateUserRequest.ts
+- [X] T034 [P] [US1] Create UserResponse DTO in src/dtos/users/UserResponse.ts
 
 **Repositories**:
-- [ ] T035 [P] [US1] Implement InMemoryUserRepository in src/repositories/UserRepository.ts (with Map storage and email index)
-- [ ] T036 [P] [US1] Implement InMemorySessionRepository in src/repositories/SessionRepository.ts (with auto-expiration check)
-- [ ] T037 [P] [US1] Create test fixtures for User data in tests/fixtures/testData.ts
+- [X] T035 [P] [US1] Implement InMemoryUserRepository in src/repositories/UserRepository.ts (with Map storage and email index)
+- [X] T036 [P] [US1] Implement InMemorySessionRepository in src/repositories/SessionRepository.ts (with auto-expiration check)
+- [X] T037 [P] [US1] Create test fixtures for User data in tests/fixtures/testData.ts
 
 **Services**:
-- [ ] T038 [US1] Implement HashService in src/services/HashService.ts (using Bun.password.hash)
-- [ ] T039 [US1] Implement AuthService.login in src/services/AuthService.ts (verify credentials, create session, return token)
-- [ ] T040 [US1] Implement AuthService.logout in src/services/AuthService.ts (invalidate session)
-- [ ] T041 [US1] Implement AuthService.validateToken in src/services/AuthService.ts (verify JWT, check session)
-- [ ] T042 [US1] Implement UserService.createUser in src/services/UserService.ts (validate uniqueness, hash password, assign default role)
+- [X] T038 [US1] Implement HashService in src/services/HashService.ts (using Bun.password.hash)
+- [X] T039 [US1] Implement AuthService.login in src/services/AuthService.ts (verify credentials, create session, return token)
+- [X] T040 [US1] Implement AuthService.logout in src/services/AuthService.ts (invalidate session)
+- [X] T041 [US1] Implement AuthService.validateToken in src/services/AuthService.ts (verify JWT, check session)
+- [X] T042 [US1] Implement UserService.createUser in src/services/UserService.ts (validate uniqueness, hash password, assign default role)
 
 **Middleware**:
-- [ ] T043 [US1] Implement authenticate middleware in src/middleware/authenticate.ts (validate JWT, attach user to request)
-- [ ] T044 [US1] Unit test for authenticate middleware in tests/unit/middleware/authenticate.test.ts
+- [X] T043 [US1] Implement authenticate middleware in src/middleware/authenticate.ts (validate JWT, attach user to request)
+- [X] T044 [US1] Unit test for authenticate middleware in tests/unit/middleware/authenticate.test.ts
 
 **Controllers**:
-- [ ] T045 [US1] Implement AuthController.login in src/controllers/AuthController.ts
-- [ ] T046 [US1] Implement AuthController.logout in src/controllers/AuthController.ts
-- [ ] T047 [US1] Implement UserController.create in src/controllers/UserController.ts (signup endpoint)
+- [X] T045 [US1] Implement AuthController.login in src/controllers/AuthController.ts
+- [X] T046 [US1] Implement AuthController.logout in src/controllers/AuthController.ts
+- [X] T047 [US1] Implement UserController.create in src/controllers/UserController.ts (signup endpoint)
 
 **Routes**:
-- [ ] T048 [US1] Setup auth routes in src/routes/auth.routes.ts (POST /auth/login, POST /auth/logout)
-- [ ] T049 [US1] Setup user creation route in src/routes/users.routes.ts (POST /users)
-- [ ] T050 [US1] Integrate routes into src/index.ts Bun.serve
+- [X] T048 [US1] Setup auth routes in src/routes/auth.routes.ts (POST /auth/login, POST /auth/logout)
+- [X] T049 [US1] Setup user creation route in src/routes/users.routes.ts (POST /users)
+- [X] T050 [US1] Integrate routes into src/index.ts Bun.serve
 
 **Integration**:
-- [ ] T051 [US1] Run all User Story 1 tests to verify independent functionality
-- [ ] T052 [US1] Manual testing following quickstart.md authentication flow examples
+- [X] T051 [US1] Run all User Story 1 tests to verify independent functionality
+- [X] T052 [US1] Manual testing following quickstart.md authentication flow examples
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can register, login, logout, and receive JWT tokens. This is the MVP.
 
