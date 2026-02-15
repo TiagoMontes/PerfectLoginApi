@@ -3,13 +3,14 @@ import { CreateUserRequestSchema } from '../dtos/users/CreateUserRequest';
 import { ValidationError } from '../utils/errors';
 import { success } from '../utils/response';
 import { ZodError } from 'zod';
+import type { FastifyRequest } from 'fastify';
 
 export class UserController {
   constructor(private userService: UserService) {}
 
-  async create(req: Request): Promise<Response> {
+  async create(req: FastifyRequest): Promise<Response> {
     try {
-      const body = await req.json();
+      const body = await req.body;
       const validated = CreateUserRequestSchema.parse(body);
 
       const user = await this.userService.createUser(validated);
@@ -20,7 +21,7 @@ export class UserController {
       );
     } catch (error) {
       if (error instanceof ZodError) {
-        const details = error.errors.map(err => ({
+        const details = error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }));

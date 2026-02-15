@@ -1,16 +1,17 @@
 import { AuthService } from '../services/AuthService';
 import { LoginRequestSchema } from '../dtos/auth/LoginRequest';
-import { LogoutResponse } from '../dtos/auth/LogoutResponse';
+import type { LogoutResponse } from '../dtos/auth/LogoutResponse';
 import { ValidationError } from '../utils/errors';
 import { success } from '../utils/response';
 import { ZodError } from 'zod';
+import type { FastifyRequest } from 'fastify';
 
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  async login(req: Request): Promise<Response> {
+  async login(req: FastifyRequest): Promise<Response> {
     try {
-      const body = await req.json();
+      const body = await req.body;
       const validated = LoginRequestSchema.parse(body);
 
       const result = await this.authService.login(validated);
@@ -18,7 +19,7 @@ export class AuthController {
       return Response.json(result, { status: 200 });
     } catch (error) {
       if (error instanceof ZodError) {
-        const details = error.errors.map(err => ({
+        const details = error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }));
@@ -28,8 +29,8 @@ export class AuthController {
     }
   }
 
-  async logout(req: Request): Promise<Response> {
-    const authHeader = req.headers.get('Authorization');
+  async logout(req: FastifyRequest): Promise<Response> {
+    const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return Response.json(
         { error: 'UnauthorizedError', message: 'Missing authorization header' },

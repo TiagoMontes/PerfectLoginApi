@@ -18,6 +18,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "fastify": "^5.7.4",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.6"
   }

@@ -1,39 +1,36 @@
+import fastify from 'fastify';
 import { loadEnv } from './utils/env';
 import { success } from './utils/response';
-import { handleError } from './middleware/errorHandler';
-import { mapRoutesForBun } from './utils/routeMapper';
 import { authRoutes } from './routes/auth.routes';
 import { userRoutes } from './routes/users.routes';
 
 const env = loadEnv();
 
-Bun.serve({
-  port: env.PORT,
-  routes: {
-    '/health': {
-      GET: async () => {
-        try {
-          return Response.json(
-            success({ status: 'ok', timestamp: new Date().toISOString() }, 'Service is healthy'),
-            { status: 200 }
-          );
-        } catch (error) {
-          return handleError(error as Error);
-        }
-      }
-    },
-    ...mapRoutesForBun({ ...authRoutes, ...userRoutes })
-  },
-  fetch() {
-    return Response.json(
-      { error: 'NotFound', message: 'Route not found' },
-      { status: 404 }
-    );
-  },
-  development: {
-    hmr: true
-  }
+const app = fastify({
+  logger: env.NODE_ENV === 'development'
 });
 
-console.log(`Server running on http://localhost:${env.PORT}`);
-console.log(`Environment: ${env.NODE_ENV}`);
+// Health check route
+app.get('/health', async (_request, reply) => {
+  return reply.status(200).send(
+    success({ status: 'ok', timestamp: new Date().toISOString() }, 'Service is healthy')
+  );
+});
+
+// Register route plugins
+app.register(authRoutes);
+app.register(userRoutes);
+
+// Start server
+const start = async () => {
+  try {
+    await app.listen({ port: env.PORT });
+    console.log(`Server running on http://localhost:${env.PORT}`);
+    console.log(`Environment: ${env.NODE_ENV}`);
+  } catch (err) {
+    app.log.error(err);
+    process.exit(1);
+  }
+};
+
+start();
