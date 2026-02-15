@@ -51,7 +51,7 @@ Single backend API project - all paths relative to repository root:
 - [X] T015 [P] Setup global error handler middleware in src/middleware/errorHandler.ts
 - [X] T016 [P] Create API response helper functions in src/utils/response.ts (success, error formatters)
 - [X] T017 [P] Create base Zod schemas in src/utils/validators.ts (email, password, phone patterns)
-- [X] T018 Setup Bun.serve entry point in src/index.ts with basic health check endpoint
+- [X] T018 Setup Fastify entry point in src/index.ts with basic health check endpoint
 - [X] T019 Create environment variable loader in src/utils/env.ts with validation
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
@@ -112,7 +112,7 @@ Single backend API project - all paths relative to repository root:
 **Routes**:
 - [X] T048 [US1] Setup auth routes in src/routes/auth.routes.ts (POST /auth/login, POST /auth/logout)
 - [X] T049 [US1] Setup user creation route in src/routes/users.routes.ts (POST /users)
-- [X] T050 [US1] Integrate routes into src/index.ts Bun.serve
+- [X] T050 [US1] Integrate routes into src/index.ts Fastify instance
 
 **Integration**:
 - [X] T051 [US1] Run all User Story 1 tests to verify independent functionality

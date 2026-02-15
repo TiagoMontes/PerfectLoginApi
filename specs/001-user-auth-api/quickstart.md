@@ -25,6 +25,7 @@ bun install
 ```
 
 This will install:
+- `fastify` - HTTP server framework
 - `jsonwebtoken` - JWT token generation/validation
 - `zod` - Input validation schemas
 - `@types/jsonwebtoken` - TypeScript types for JWT
@@ -73,11 +74,14 @@ loginApi/
 │   ├── dtos/              # Request/response type definitions
 │   ├── services/          # Business logic layer
 │   ├── controllers/       # HTTP request handlers
-│   ├── routes/            # Endpoint definitions
+│   ├── routes/            # Route definitions (centralized by entity)
+│   │   ├── auth.routes.ts     # Authentication endpoints
+│   │   ├── users.routes.ts    # User CRUD endpoints
+│   │   └── profile.routes.ts  # Profile endpoints
 │   ├── middleware/        # Auth, RBAC, error handling
 │   ├── repositories/      # Data access layer (in-memory)
 │   ├── utils/             # Helper functions, validators
-│   └── index.ts           # Application entry point
+│   └── index.ts           # Fastify entry point (registers all routes)
 ├── tests/
 │   ├── unit/              # Unit tests (services, utils)
 │   ├── integration/       # API endpoint tests
@@ -87,6 +91,8 @@ loginApi/
 ├── .env.example           # Environment template
 └── package.json
 ```
+
+**Route Organization**: Each entity has its own route file in `src/routes/`. These are imported and registered as Fastify plugins in `src/index.ts`.
 
 ## API Endpoints
 
@@ -587,7 +593,7 @@ source ~/.bashrc  # or ~/.zshrc
 ## Additional Resources
 
 - [Bun Documentation](https://bun.sh/docs)
-- [Bun.serve API](https://bun.sh/docs/api/http)
+- [Fastify Documentation](https://fastify.dev)
 - [Zod Documentation](https://zod.dev)
 - [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
 - [RESTful API Guidelines](https://restfulapi.net)

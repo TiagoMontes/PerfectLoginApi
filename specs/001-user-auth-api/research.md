@@ -124,39 +124,51 @@ describe('AuthService', () => {
 
 ### 5. HTTP Server
 
-**Decision**: Bun.serve() with route object
+**Decision**: Fastify framework
 
 **Rationale**:
-- Built into Bun - no Express needed
-- Built-in WebSocket support (for future real-time features)
-- Faster than Express (6x throughput)
-- Native request/response objects
-- Hot reload in development mode
+- Excellent TypeScript support with type inference
+- Schema-based validation with JSON Schema
+- Fast performance with low overhead
+- Rich plugin ecosystem
+- Built-in request/response validation
+- Better route organization and middleware composition than Bun.serve
 
 **Alternatives Considered**:
-- Express: Slower, unnecessary abstraction layer
-- Fastify: Better than Express but still slower than Bun.serve
+- Bun.serve: Built-in but limited routing capabilities and middleware support
+- Express: Slower, weaker TypeScript support
 - Elysia: Bun-specific framework adds complexity
 
 **Implementation Pattern**:
 ```typescript
-Bun.serve({
-  port: 3000,
-  routes: {
-    '/auth/login': {
-      POST: loginController.handle
-    },
-    '/users/:id': {
-      GET: userController.getById,
-      PUT: userController.update,
-      DELETE: userController.delete
-    }
-  },
-  development: {
-    hmr: true
-  }
-});
+// src/routes/users.routes.ts
+import { FastifyInstance } from 'fastify';
+
+export async function userRoutes(app: FastifyInstance) {
+  app.get('/users/:id', userController.getById);
+  app.put('/users/:id', userController.update);
+  app.delete('/users/:id', userController.delete);
+}
+
+// src/index.ts
+import fastify from 'fastify';
+import { authRoutes } from './routes/auth.routes';
+import { userRoutes } from './routes/users.routes';
+
+const app = fastify({ logger: true });
+
+// Register route plugins (centralized by entity)
+app.register(authRoutes);
+app.register(userRoutes);
+
+await app.listen({ port: 3000 });
 ```
+
+**Route Organization**:
+- Each entity has its own route file in `src/routes/`
+- Routes are exported as Fastify plugin functions
+- All routes registered in `src/index.ts` using `app.register()`
+- This pattern ensures modular, maintainable route management
 
 ## Architectural Patterns
 
@@ -188,7 +200,41 @@ class InMemoryUserRepository implements IUserRepository {
 }
 ```
 
-### 2. Middleware-Based Authentication/Authorization
+### 2. Route Organization Pattern
+
+**Decision**: Centralize routes by entity in separate files, register as Fastify plugins
+
+**Rationale**:
+- Single Responsibility: Each route file manages one domain entity
+- Modular: Easy to locate and modify entity-specific endpoints
+- Scalable: Adding new entities doesn't bloat main file
+- Testable: Can test route modules independently
+- Fastify Plugin System: Natural fit with framework design
+
+**Pattern**:
+```typescript
+// src/routes/users.routes.ts
+import { FastifyInstance } from 'fastify';
+
+export async function userRoutes(app: FastifyInstance) {
+  app.get('/users', userController.list);
+  app.get('/users/:id', userController.getById);
+  app.post('/users', userController.create);
+  app.put('/users/:id', userController.update);
+  app.delete('/users/:id', userController.delete);
+}
+
+// src/index.ts
+import { authRoutes } from './routes/auth.routes';
+import { userRoutes } from './routes/users.routes';
+import { profileRoutes } from './routes/profile.routes';
+
+app.register(authRoutes);
+app.register(userRoutes);
+app.register(profileRoutes);
+```
+
+### 3. Middleware-Based Authentication/Authorization
 
 **Decision**: Separate middleware for auth (authentication) and RBAC (authorization)
 
@@ -224,7 +270,7 @@ export const authorize = (...roles: Role[]) => {
 }
 ```
 
-### 3. Service Layer for Business Logic
+### 4. Service Layer for Business Logic
 
 **Decision**: All business logic in services, controllers stay thin
 
@@ -263,7 +309,7 @@ class UserService {
 }
 ```
 
-### 4. DTO Pattern with Zod Schemas
+### 5. DTO Pattern with Zod Schemas
 
 **Decision**: Separate request/response DTOs with Zod validation
 
@@ -665,7 +711,7 @@ All technical unknowns from plan.md Technical Context section have been resolved
 
 ## References
 
-- [Bun.serve() documentation](https://bun.sh/docs/api/http)
+- [Fastify documentation](https://fastify.dev)
 - [Bun.password API](https://bun.sh/docs/api/hashing#bun-password)
 - [Zod documentation](https://zod.dev)
 - [jsonwebtoken npm](https://www.npmjs.com/package/jsonwebtoken)

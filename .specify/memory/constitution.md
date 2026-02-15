@@ -91,7 +91,7 @@ Code MUST prioritize readability and maintainability over cleverness:
 **Runtime**: Bun (NOT Node.js)
 - Use `bun <file>` to run TypeScript directly
 - Use `bun test` for testing
-- Use `Bun.serve()` for HTTP server (NOT Express)
+- Use `Fastify` for HTTP server framework
 - Use `bun:sqlite` for database (if SQLite chosen)
 - Bun automatically loads .env files (no dotenv package needed)
 
@@ -104,6 +104,13 @@ Code MUST prioritize readability and maintainability over cleverness:
 - Models = Entities (data layer)
 - Controllers = Request handlers
 - Views = JSON responses (no HTML templating)
+
+**Route Organization**:
+- Centralize routes by entity in `src/routes/` directory
+- Each entity has its own route file (e.g., `auth.routes.ts`, `users.routes.ts`)
+- Route files export Fastify plugin functions
+- All routes are registered in `src/index.ts` using `app.register()`
+- This pattern ensures clear separation of concerns and modular route management
 
 ## Development Workflow
 

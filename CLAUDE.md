@@ -11,7 +11,7 @@ Default to using Bun instead of Node.js.
 
 ## APIs
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
+- Use `Fastify` for HTTP server and routing. Fastify provides excellent TypeScript support, validation, and plugin ecosystem.
 - `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
 - `Bun.redis` for Redis. Don't use `ioredis`.
 - `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
@@ -31,79 +31,65 @@ test("hello world", () => {
 });
 ```
 
-## Frontend
+## HTTP Server
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
+Use `Fastify` for building REST APIs with TypeScript support.
 
-Server:
+### Route Organization Pattern
 
-```ts#index.ts
-import index from "./index.html"
+- **Centralize routes by entity** in `src/routes/` (e.g., `auth.routes.ts`, `users.routes.ts`)
+- **Register route plugins** in `src/index.ts` using `app.register()`
+- Each route file exports a Fastify plugin function
 
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
-```
+Example route file:
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+```ts#src/routes/users.routes.ts
+import { FastifyInstance } from 'fastify';
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
-```
+export async function userRoutes(app: FastifyInstance) {
+  app.get('/users/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    return { id };
+  });
 
-With the following `frontend.tsx`:
-
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
-
-// import .css files directly and it works
-import './index.css';
-
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
+  app.post('/users', async (request, reply) => {
+    // Create user logic
+  });
 }
-
-root.render(<Frontend />);
 ```
 
-Then, run index.ts
+Main server file:
+
+```ts#src/index.ts
+import fastify from 'fastify';
+import { userRoutes } from './routes/users.routes';
+import { authRoutes } from './routes/auth.routes';
+
+const app = fastify({ logger: true });
+
+// Register route plugins
+app.register(authRoutes);
+app.register(userRoutes);
+
+const start = async () => {
+  try {
+    await app.listen({ port: 3000 });
+  } catch (err) {
+    app.log.error(err);
+    process.exit(1);
+  }
+};
+
+start();
+```
+
+Then, run index.ts with hot reload:
 
 ```sh
 bun --hot ./index.ts
 ```
 
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+For more information, read the Fastify docs at https://fastify.dev and Bun API docs in `node_modules/bun-types/docs/**.mdx`.
 
 ## Active Technologies
 - TypeScript with Bun runtime (latest stable) (001-user-auth-api)

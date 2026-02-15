@@ -13,7 +13,8 @@ Implement a secure RESTful authentication and user management API with role-base
 
 **Language/Version**: TypeScript with Bun runtime (latest stable)
 **Primary Dependencies**:
-- Bun built-in APIs (Bun.serve, Bun.password)
+- Fastify (HTTP server and routing framework)
+- Bun built-in APIs (Bun.password)
 - Zod (input validation schemas)
 - jsonwebtoken (JWT token generation/validation)
 
@@ -58,11 +59,16 @@ Implement a secure RESTful authentication and user management API with role-base
 ### II. Layered Architecture (MVC Pattern) ✅ COMPLIANT
 
 Planned structure:
-- **Routes** (`src/routes/`): Define endpoint mappings, attach middleware
+- **Routes** (`src/routes/`): Define endpoint mappings, attach middleware. Each entity has its own route file exported as Fastify plugin, registered in `src/index.ts`
 - **Controllers** (`src/controllers/`): Handle HTTP I/O, validate with Zod, delegate to services
 - **Services** (`src/services/`): Business logic, RBAC enforcement, session management
 - **Entities** (`src/entities/`): User, Role, Session type definitions
 - **DTOs** (`src/dtos/`): Request/response type definitions and Zod schemas
+
+**Route Organization Pattern**:
+- Routes centralized by entity (e.g., `auth.routes.ts`, `users.routes.ts`)
+- Each route file exports a Fastify plugin function
+- All routes registered in `src/index.ts` using `app.register()`
 
 **Layer interaction**: Routes → Controllers → Services → Entities (strict one-way)
 **No violations**: Business logic stays in services, controllers remain thin
@@ -153,10 +159,10 @@ src/
 │   ├── UserController.ts    # /users CRUD endpoints
 │   └── ProfileController.ts # /profile endpoints
 ├── routes/
-│   ├── auth.routes.ts
-│   ├── users.routes.ts
-│   ├── profile.routes.ts
-│   └── index.ts         # Route aggregation
+│   ├── auth.routes.ts       # Authentication routes (login, logout)
+│   ├── users.routes.ts      # User CRUD routes
+│   └── profile.routes.ts    # Profile management routes
+│   # Note: Routes are registered in src/index.ts, no index.ts needed here
 ├── middleware/
 │   ├── authenticate.ts  # JWT validation middleware
 │   ├── authorize.ts     # RBAC enforcement middleware
@@ -167,7 +173,7 @@ src/
 ├── utils/
 │   ├── jwt.ts           # JWT sign/verify helpers
 │   └── validators.ts    # Zod schema definitions
-└── index.ts             # Bun.serve entry point
+└── index.ts             # Fastify entry point
 
 tests/
 ├── unit/
